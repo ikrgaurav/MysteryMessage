@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Mystery Message",
+  title: "Onest Feedback",
   description: "Write Messages Anonymously",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

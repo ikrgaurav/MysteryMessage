@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -23,14 +23,28 @@ import { useForm } from "react-hook-form";
 function VerifyAccount() {
   const router = useRouter();
   const params = useParams<{ username: string }>();
+  const [username, setUsername] = useState<string>("");
+
+  // Initialize username with proper decoding
+  useEffect(() => {
+    // Make sure the username is properly decoded
+    if (params.username) {
+      const decodedUsername = decodeURIComponent(params.username);
+      setUsername(decodedUsername);
+    }
+  }, [params.username]);
+
   const form = useForm<z.infer<typeof verifySchema>>({
     resolver: zodResolver(verifySchema),
+    defaultValues: {
+      code: "",
+    },
   });
 
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
     try {
       const response = await axios.post(`/api/verify-code`, {
-        username: params.username,
+        username: username,
         code: data.code,
       });
 
@@ -38,14 +52,17 @@ function VerifyAccount() {
         description: response.data.message,
       });
 
-      router.replace("sign-in");
+      router.replace("/sign-in");
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
       toast("Sign up failed", {
-        description: axiosError.response?.data.message,
+        description:
+          axiosError.response?.data.message ||
+          "An error occurred during verification",
       });
     }
   };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg shadow-gray-500">
@@ -55,6 +72,9 @@ function VerifyAccount() {
           </h1>
           <p className="mb-4">
             Enter your verification code sent to your email
+          </p>
+          <p className="text-sm text-gray-500">
+            Verifying account for: {username}
           </p>
         </div>
         <Form {...form}>
@@ -72,7 +92,9 @@ function VerifyAccount() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={!username}>
+              Submit
+            </Button>
           </form>
         </Form>
       </div>

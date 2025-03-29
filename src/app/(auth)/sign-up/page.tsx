@@ -89,7 +89,7 @@ const Page = () => {
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-mg">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-            Join Mystery Message
+            Join Onest Feedback
           </h1>
           <p className="mb-4">Sign up to start your anonymous adventure</p>
         </div>
@@ -116,7 +116,7 @@ const Page = () => {
                   <p
                     className={`text-sm ${usernameMessage == "Username is available" ? "text-green-500" : "text-red-500"}`}
                   >
-                    test {usernameMessage}
+                    {usernameMessage}
                   </p>
                   <FormMessage />
                 </FormItem>

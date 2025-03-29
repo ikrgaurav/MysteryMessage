@@ -1,9 +1,14 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
-import bcrypt from "bcryptjs";
+import { User as NextAuthUser } from "next-auth";
+import bcrypt from "bcrypt";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
+
+interface CredentialsType {
+  identifier: string;
+  password: string;
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -14,7 +19,9 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: any): Promise<any> {
+      async authorize(
+        credentials: CredentialsType
+      ): Promise<NextAuthUser | null> {
         await dbConnect();
         try {
           const user = await UserModel.findOne({
@@ -30,16 +37,17 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Please verify your account first");
           }
           const isPasswordCorrect = await bcrypt.compare(
-            credentials.passowrd,
+            credentials.password,
             user.password
           );
           if (isPasswordCorrect) {
-            return user;
+            return user as unknown as NextAuthUser;
           } else {
             throw new Error("Incorrect password");
           }
-        } catch (err: any) {
-          throw new Error(err);
+        } catch (err: unknown) {
+          const error = err as Error;
+          throw new Error(error.message || "Authentication error");
         }
       },
     }),

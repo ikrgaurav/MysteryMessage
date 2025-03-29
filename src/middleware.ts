@@ -6,6 +6,11 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
   const url = request.nextUrl;
 
+  // Skip middleware for API routes
+  if (url.pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   if (
     token &&
     (url.pathname.startsWith("/sign-in") ||

@@ -6,20 +6,21 @@ import { Message } from "@/model/User";
 import { ApiResponse } from "@/types/ApiResponse";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";
-import { Loader2, RefreshCcw } from "lucide-react";
+import { Loader2, LogOut, RefreshCcw } from "lucide-react";
 import { User } from "next-auth";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { acceptMessageSchema } from "@/schemas/acceptMessageSchema";
 import { toast } from "sonner";
 import { MessageCard } from "@/components/ui/MessageCard";
 
-
 function UserDashboard() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSwitchLoading, setIsSwitchLoading] = useState(false);
+  const router = useRouter();
 
   const handleDeleteMessage = (messageId: string) => {
     setMessages(messages.filter((message) => message._id !== messageId));
@@ -37,7 +38,7 @@ function UserDashboard() {
   const fetchAcceptMessages = useCallback(async () => {
     setIsSwitchLoading(true);
     try {
-      const response = await axios.get<ApiResponse>("/api/accept-messages");
+      const response = await axios.get<ApiResponse>("/api/accept-message");
       setValue("acceptMessages", response.data.isAcceptingMessages ?? false);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
@@ -89,7 +90,7 @@ function UserDashboard() {
   // Handle switch change
   const handleSwitchChange = async () => {
     try {
-      const response = await axios.post<ApiResponse>("/api/accept-messages", {
+      const response = await axios.post<ApiResponse>("/api/accept-message", {
         acceptMessages: !acceptMessages,
       });
       setValue("acceptMessages", !acceptMessages);
@@ -102,6 +103,11 @@ function UserDashboard() {
           "Failed to update message settings",
       });
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
   };
 
   if (!session || !session.user) {
@@ -122,7 +128,17 @@ function UserDashboard() {
 
   return (
     <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded w-full max-w-6xl">
-      <h1 className="text-4xl font-bold mb-4">User Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-4xl font-bold">User Dashboard</h1>
+        <Button
+          variant="outline"
+          onClick={handleSignOut}
+          className="flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Sign Out
+        </Button>
+      </div>
 
       <div className="mb-4">
         <h2 className="text-lg font-semibold mb-2">Copy Your Unique Link</h2>{" "}
