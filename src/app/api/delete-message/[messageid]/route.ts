@@ -6,9 +6,9 @@ import UserModel from "@/model/User";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { messageid: string } }
+  context: { params: { messageid: string } }
 ) {
-  const messageId = params.messageid;
+  const messageId = context.params.messageid;
   await dbConnect();
 
   const session = await getServerSession(authOptions);
@@ -17,11 +17,11 @@ export async function DELETE(
   if (!session || !session.user) {
     return Response.json(
       {
-        session: false,
+        success: false,
         message: "Not Authenticated",
       },
       {
-        status: 400,
+        status: 401,
       }
     );
   }
@@ -33,8 +33,8 @@ export async function DELETE(
     if (updateResult.modifiedCount == 0) {
       return Response.json(
         {
-          session: false,
-          message: "Message not found or already delete",
+          success: false,
+          message: "Message not found or already deleted",
         },
         {
           status: 404,
@@ -43,7 +43,7 @@ export async function DELETE(
     }
     return Response.json(
       {
-        session: true,
+        success: true,
         message: "Message Deleted",
       },
       {
@@ -54,7 +54,7 @@ export async function DELETE(
     console.log("Error in delete message route", error);
     return Response.json(
       {
-        session: false,
+        success: false,
         message: "Error Deleting Message",
       },
       {
