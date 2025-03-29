@@ -19,6 +19,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
+      // @ts-expect-error - Type mismatch between NextAuth and our app
       async authorize(
         credentials: CredentialsType
       ): Promise<NextAuthUser | null> {
